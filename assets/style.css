@@ -829,8 +829,16 @@ body.ready .slot{animation:dealIn .95s var(--ease) backwards;animation-delay:cal
 
 /* the greeting */
 .hello{margin-bottom:clamp(14px,2vw,22px)}
-/* "HELLO!" is 4.184em of advance + 5 gaps of .02em, so 100/4.284 = 23.34cqw */
-.hello .wordmark{font-size:min(23.34cqw, 12vh)}
+/* "HELLO!" is 4.184em of advance + 5 gaps of .02em, so 100/4.284 = 23.34cqw.
+   BUT: `container-type` needs a block box, and here .wm-box sits inside a
+   plain <h3>, so it stayed display:inline and was NOT a query container —
+   the cqw resolved against the viewport instead of the column. On a phone
+   that sized the word to 375px of column width it did not have, and the
+   "!" hung 75px off the right edge, off-screen. Blockifying .wm-box makes
+   it the container the comment above always assumed it was.
+   Measured advance is 4.32em once tracking is counted, so 100/4.32 = 23.1. */
+.hello .wm-box{display:block}
+.hello .wordmark{font-size:min(23.1cqw, 12vh)}
 .hello .wordmark .gl:last-child{color:var(--o)}   /* the exclamation mark */
 
 /* min-width:0 lets the 1fr column shrink below the text's min-content width */
@@ -1467,20 +1475,26 @@ body.ready .rv.in .banner-word .gl{
   font-style:normal;
   width:clamp(38px,3.4vw,52px);aspect-ratio:1;border-radius:50%;
   display:grid;place-items:center;
-  font-size:clamp(.8rem,1vw,1rem);color:#fff;padding-left:.12em;
+  font-size:clamp(.8rem,1vw,1rem);color:#fff;
   background:linear-gradient(150deg,rgba(255,255,255,.22),rgba(255,255,255,.08));
   backdrop-filter:blur(14px) saturate(150%);
   -webkit-backdrop-filter:blur(14px) saturate(150%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 12px 28px -12px rgba(0,0,0,.9);
   transition:transform .4s var(--ease),background .4s var(--ease);
 }
-.shot:hover .play i{transform:scale(1.09);background:linear-gradient(150deg,var(--o-hi),var(--o-deep))}
-.shot:hover .play{background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.2))}
 /* once it is running the control gets out of the way */
 .shot.playing .play{opacity:0;pointer-events:none}
-.shot.playing:hover .play{opacity:1;pointer-events:auto}
-.shot.playing:hover .play i::before{content:"❚❚";font-size:.62em;letter-spacing:.06em}
-.shot.playing:hover .play i{font-size:0}
+
+/* Hover states are gated behind a real pointer. A phone keeps :hover
+   latched on the last thing tapped, so the ungated version brought the
+   whole overlay straight back on top of the clip the moment you started
+   it — the orange disc that would not go away. On touch the overlay now
+   simply leaves, and a tap on the clip itself pauses it (see app.js). */
+@media(hover:hover) and (pointer:fine){
+  .shot:hover .play i{transform:scale(1.09);background:linear-gradient(150deg,var(--o-hi),var(--o-deep))}
+  .shot:hover .play{background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.2))}
+  .shot.playing:hover .play{opacity:1;pointer-events:auto}
+}
 
 /* the empty state — reads as a designed slot, not a broken image */
 .ph{
@@ -2198,3 +2212,21 @@ body.ready .rv.in .banner-word .gl{
   .slot{flex:0 0 74vw}
   .drawer-head{--cw:clamp(126px,34cqw,250px)}   /* fan thumbs: was 104px */
 }
+
+
+/* ══════════════════════════════════════════════════════════════════
+   ICONS — 15 Sep 2026
+   The arrows and play triangles used to be the characters U+2197 and
+   U+25B6. Poppins carries neither, so Android fell through the font
+   stack to Noto Color Emoji and drew them as blue emoji tiles. These
+   are now inline SVG, so they are the right colour everywhere and
+   inherit from `color` like the glyphs did.
+   ══════════════════════════════════════════════════════════════════ */
+.ico{width:1.05em;height:1.05em;display:block;flex:none;overflow:visible}
+.ico-arrow{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.ico-play,.ico-pause{fill:currentColor;stroke:none}
+.play i .ico{width:38%;height:38%}
+.play i .ico-pause{display:none}
+.shot.playing .play i .ico-play{display:none}
+.shot.playing .play i .ico-pause{display:block}
+.plate .go .ico,.nc-go .ico,.lede-cta i .ico{width:1.15em;height:1.15em}

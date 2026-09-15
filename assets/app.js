@@ -276,6 +276,13 @@
     };
 
     btn.addEventListener('click', toggle);
+
+    // On touch the overlay is hidden while the clip runs (see the
+    // hover gate in style.css), so the clip itself has to be what you
+    // tap to pause it. Harmless on desktop: the overlay sits on top
+    // there and swallows the click before it reaches the video.
+    v.addEventListener('click', toggle);
+
     v.addEventListener('play',  () => shot.classList.add('playing'));
     v.addEventListener('pause', () => shot.classList.remove('playing'));
   });
