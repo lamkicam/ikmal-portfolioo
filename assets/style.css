@@ -703,7 +703,16 @@ a:focus-visible,button:focus-visible{
   display:flex;align-items:center;gap:10px;font-size:.56rem;color:var(--txt-mute);
   justify-content:center;padding-bottom:14px;
 }
-.scroll-cue .rail{width:1px;height:34px;background:linear-gradient(180deg,transparent,var(--steel));position:relative;overflow:hidden}
+/* NOTE: `.rail` is also the tools rail on the chapter banners (see below),
+   and that rule's display/padding/box-shadow leak onto this one — which
+   inflated this 1px hairline into a 32x34 grey box next to "Scroll to get
+   in touch". Reset them explicitly rather than rename, so both stay put. */
+.scroll-cue .rail{
+  width:1px;height:34px;flex:none;display:block;padding:0;
+  box-shadow:none;border:0;border-radius:0;
+  background:linear-gradient(180deg,transparent,var(--steel));
+  position:relative;overflow:hidden;
+}
 .scroll-cue .rail::after{content:"";position:absolute;inset:0;background:var(--o);animation:drop 1.9s var(--ease) infinite}
 @keyframes drop{0%{transform:translateY(-100%)}60%,100%{transform:translateY(100%)}}
 
@@ -2076,8 +2085,13 @@ body.ready .rv.in .banner-word .gl{
   .spec{margin-left:0}
   .roles{border-left:0;padding-left:0}
   .who{font-size:clamp(1rem,4.6vw,1.4rem)}
-  .strip-in{flex-direction:column;align-items:stretch}
-  .ticker{order:2}
+  /* FIX: .strip-in keeps flex-wrap:wrap from the base rule. In a WRAPPING
+     column container, align-items:stretch sizes each item to its flex LINE,
+     and the line takes the ticker's max-content width (~3400px) — which blew
+     the whole page out to 3444px wide and made the ticker 320px tall
+     (flex-basis:320px lands on HEIGHT once the axis turns vertical). */
+  .strip-in{flex-direction:column;align-items:stretch;flex-wrap:nowrap;gap:14px}
+  .ticker{order:2;flex:0 0 auto;width:100%;max-width:100%;padding:10px 0}
   .dock{order:1;justify-content:center;flex-wrap:wrap}
 }
 @media(max-width:620px){
@@ -2127,3 +2141,60 @@ body.ready .rv.in .banner-word .gl{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
 }
 .sheet a[aria-current="page"]{background:rgba(255,255,255,.1)}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MOBILE POLISH — 15 Sep 2026
+   A tidy-up pass for phones, nothing more: type sizes, spacing,
+   photo sizes and touch targets. The layout and the design language
+   are unchanged. Everything is scoped to <=620px, so nothing here
+   can reach the desktop view.
+
+   Why so much of it: a dozen labels were sized in `cqw`/`vw` whose
+   clamp floors were tuned on a wide screen. On a 343px container
+   1.9cqw is 6.5px — the figures under the Prompter banner were
+   literally rendering at 6.5px. Sizes below are absolute so they
+   cannot collapse again.
+   ══════════════════════════════════════════════════════════════════ */
+@media(max-width:620px){
+
+  /* ── 1 · label sizes ──
+     Floor of ~10px, and the letter-spacing comes in with it: wide
+     tracking costs proportionally more the smaller the type gets. */
+  .banner-figs span{font-size:.68rem;letter-spacing:.1em}      /* was 6.5px */
+  .banner-claim p{font-size:clamp(1.05rem,5.6cqw,1.5rem)}      /* was 15.1px */
+  .rail-list i{font-size:.64rem;letter-spacing:.08em}          /* was 6.7px */
+  .rail-list img{height:20px}                                  /* was 14px */
+  .rail-lbl{font-size:1rem}
+  .frame .chip{font-size:.6rem;letter-spacing:.1em;padding:4px 8px;left:8px;top:8px}
+  .album-head span{font-size:.64rem;letter-spacing:.12em;line-height:1.55}
+  .stats span{font-size:.64rem;letter-spacing:.1em}
+  .ch-no{font-size:.72rem;letter-spacing:.16em}
+  .proof-say h3{font-size:.72rem;letter-spacing:.14em}
+
+  /* ── 2 · the photographs get the room ──
+     Trimming the album padding hands every frame ~12px of width, and
+     the wedding wall drops to one column: at two columns its frames
+     were landing at 149px wide and as little as 51px tall, which is
+     too small to read as a photograph at all. */
+  .album{padding:12px;border-radius:20px}
+  .album-head{margin-bottom:12px;padding:0 2px}
+  .wall{columns:1}
+  .justified{column-gap:10px}
+  .filmstrip{gap:10px}
+
+  /* ── 3 · touch targets ──
+     44px is the smallest comfortable tap. The carousel dots were
+     26x22 and the footer links 23px tall; the visible dot keeps its
+     size, only the hit area grows around it. */
+  .dots{padding:0}
+  .dots button{width:44px;height:44px}
+  .foot-nav a{padding:9px 0;font-size:1rem}
+  .foot-nav{gap:0}
+
+  /* ── 4 · the two carousels ──
+     Cards were 248px on a 375px screen; 74vw reads as "one card plus
+     a hint of the next", which is what makes a swipe row legible. */
+  .slot{flex:0 0 74vw}
+  .drawer-head{--cw:clamp(126px,34cqw,250px)}   /* fan thumbs: was 104px */
+}
