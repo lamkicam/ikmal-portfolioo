@@ -2230,3 +2230,18 @@ body.ready .rv.in .banner-word .gl{
 .shot.playing .play i .ico-play{display:none}
 .shot.playing .play i .ico-pause{display:block}
 .plate .go .ico,.nc-go .ico,.lede-cta i .ico{width:1.15em;height:1.15em}
+
+
+/* ── CV download ── 16 Sep 2026
+   Primary action on the Introduction page, so it inverts against the orange
+   contact pills instead of joining them. In the footer bar it is just one
+   more item and inherits that row's fill:currentColor icon treatment. */
+.say-links a.cv{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#fff;color:#2a1710;
+  box-shadow:inset 0 -1px 0 rgba(0,0,0,.08),0 10px 24px -14px rgba(0,0,0,.7);
+}
+.say-links a.cv:hover{filter:none;background:#fff8f3}
+.say-links a.cv .ico-dl{display:block;width:14px;height:14px}
+.say-links a.cv .ico-dl svg{width:100%;height:100%;fill:currentColor;display:block}
+.foot-contact a.cv-link{font-weight:700}
